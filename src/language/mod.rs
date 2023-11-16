@@ -94,14 +94,10 @@ impl Language {
 	}
 
 	/// Returns the word at index `idx`. Returns `None` if the index is out of bounds.
-	pub fn word(self, idx: usize) -> Option<&'static str> {
-		if idx >= 2048 {
-			return None;
-		}
-
+	pub fn word(self, idx: usize) -> &'static str {
 		#[cfg(not(feature = "compact"))]
 		{
-			Some(self.word_list()[idx])
+			self.word_list()[idx]
 		}
 
 		#[cfg(feature = "compact")]
@@ -130,7 +126,7 @@ impl Language {
 				#[cfg(feature = "spanish")]
 				Language::Spanish => (spanish::WORDS_COMPACT, &spanish::INDICES),
 			};
-			Some(&all_words[indices[idx] as usize..indices[idx + 1] as usize])
+			&all_words[indices[idx] as usize..indices[idx + 1] as usize]
 		}
 	}
 
@@ -207,7 +203,7 @@ impl Language {
 	/// Get the index of the word in the word list.
 	#[inline]
 	pub fn find_word(self, word: &str) -> Option<u16> {
-		(0..2048).map(|i| self.word(i).unwrap()).position(|w| w == word).map(|i| i as u16)
+		(0..2048).map(|i| self.word(i)).position(|w| w == word).map(|i| i as u16)
 	}
 }
 
@@ -297,12 +293,8 @@ mod tests {
 	#[test]
 	fn test_word() {
 		fn test_lang(lang: Language, expected: &str, expected2: &str) {
-			assert_eq!(lang.word(1001), Some(expected));
-			assert_eq!(lang.word(2047), Some(expected2));
-			for i in 0..2048 {
-				lang.word(i).unwrap();
-			}
-			assert!(lang.word(2048).is_none());
+			assert_eq!(lang.word(1001), expected);
+			assert_eq!(lang.word(2047), expected2);
 		}
 
 		test_lang(Language::English, "large", "zoo");
