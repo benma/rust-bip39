@@ -324,8 +324,7 @@ impl Mnemonic {
 	/// }
 	/// ```
 	pub fn words(&self) -> impl Iterator<Item = &'static str> + Clone + '_ {
-		let list = self.lang.word_list();
-		self.word_indices().map(move |i| list[i])
+		self.word_indices().map(move |i| self.lang.word(i).unwrap())
 	}
 
 	/// Returns an iterator over the words of the [Mnemonic].
@@ -342,11 +341,9 @@ impl Mnemonic {
 	///
 	/// ```
 	/// use bip39::{Language, Mnemonic};
-	///
-	/// let list = Language::English.word_list();
 	/// let mnemonic = Mnemonic::from_entropy(&[0; 32]).unwrap();
 	/// for i in mnemonic.word_indices() {
-	/// 	println!("{} ({})", list[i], i);
+	/// 	println!("{} ({})", Language::English.word(i).unwrap(), i);
 	/// }
 	/// ```
 	pub fn word_indices(&self) -> impl Iterator<Item = usize> + Clone + '_ {

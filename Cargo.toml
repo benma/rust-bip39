@@ -15,6 +15,7 @@ edition = "2018"
 default = [ "std" ]
 std = [ "unicode-normalization", "serde/std" ]
 rand = [ "crate_rand", "rand_core" ]
+compact = []
 
 # Note: English is the standard for bip39 so always included
 chinese-simplified = []

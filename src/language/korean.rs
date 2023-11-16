@@ -1,3 +1,5 @@
+#[cfg(not(feature = "compact"))]
+#[rustfmt::skip]
 pub const WORDS: [&str; 2048] = [
 	"가격",
 	"가끔",

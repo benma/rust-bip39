@@ -93,7 +93,49 @@ impl Language {
 		]
 	}
 
+	/// Returns the word at index `idx`. Returns `None` if the index is out of bounds.
+	pub fn word(self, idx: usize) -> Option<&'static str> {
+		if idx >= 2048 {
+			return None;
+		}
+
+		#[cfg(not(feature = "compact"))]
+		{
+			Some(self.word_list()[idx])
+		}
+
+		#[cfg(feature = "compact")]
+		{
+			let (all_words, indices) = match self {
+				Language::English => (english::WORDS_COMPACT, &english::INDICES),
+				#[cfg(feature = "chinese-simplified")]
+				Language::SimplifiedChinese => {
+					(chinese_simplified::WORDS_COMPACT, &chinese_simplified::INDICES)
+				}
+				#[cfg(feature = "chinese-traditional")]
+				Language::TraditionalChinese => {
+					(chinese_traditional::WORDS_COMPACT, &chinese_traditional::INDICES)
+				}
+				#[cfg(feature = "czech")]
+				Language::Czech => (czech::WORDS_COMPACT, &czech::INDICES),
+				#[cfg(feature = "french")]
+				Language::French => (french::WORDS_COMPACT, &french::INDICES),
+				#[cfg(feature = "italian")]
+				Language::Italian => (italian::WORDS_COMPACT, &italian::INDICES),
+				#[cfg(feature = "japanese")]
+				Language::Japanese => (japanese::WORDS_COMPACT, &japanese::INDICES),
+				// TODO: korean
+				#[cfg(feature = "portuguese")]
+				Language::Portuguese => (portuguese::WORDS_COMPACT, &portuguese::INDICES),
+				#[cfg(feature = "spanish")]
+				Language::Spanish => (spanish::WORDS_COMPACT, &spanish::INDICES),
+			};
+			Some(&all_words[indices[idx] as usize..indices[idx + 1] as usize])
+		}
+	}
+
 	/// The word list for this language.
+	#[cfg(not(feature = "compact"))]
 	#[inline]
 	pub fn word_list(self) -> &'static [&'static str; 2048] {
 		match self {
@@ -146,6 +188,7 @@ impl Language {
 		}
 	}
 
+	#[cfg(not(feature = "compact"))]
 	/// Get words from the word list that start with the given prefix.
 	pub fn words_by_prefix(self, prefix: &str) -> &[&'static str] {
 		// The words in the word list are ordered lexicographically. This means
@@ -164,7 +207,7 @@ impl Language {
 	/// Get the index of the word in the word list.
 	#[inline]
 	pub fn find_word(self, word: &str) -> Option<u16> {
-		self.word_list().iter().position(|w| *w == word).map(|i| i as u16)
+		(0..2048).map(|i| self.word(i).unwrap()).position(|w| w == word).map(|i| i as u16)
 	}
 }
 
@@ -251,6 +294,45 @@ mod tests {
 		}
 	}
 
+	#[test]
+	fn test_word() {
+		fn test_lang(lang: Language, expected: &str, expected2: &str) {
+			assert_eq!(lang.word(1001), Some(expected));
+			assert_eq!(lang.word(2047), Some(expected2));
+			for i in 0..2048 {
+				lang.word(i).unwrap();
+			}
+			assert!(lang.word(2048).is_none());
+		}
+
+		test_lang(Language::English, "large", "zoo");
+
+		#[cfg(feature = "chinese-simplified")]
+		test_lang(Language::SimplifiedChinese, "播", "歇");
+
+		#[cfg(feature = "chinese-traditional")]
+		test_lang(Language::TraditionalChinese, "播", "歇");
+
+		#[cfg(feature = "czech")]
+		test_lang(Language::Czech, "obec", "zvyk");
+
+		#[cfg(feature = "french")]
+		test_lang(Language::French, "hurler", "zoologie");
+
+		#[cfg(feature = "italian")]
+		test_lang(Language::Italian, "merlo", "zuppa");
+
+		#[cfg(feature = "japanese")]
+		test_lang(Language::Japanese, "そうしん", "われる");
+
+		#[cfg(feature = "portuguese")]
+		test_lang(Language::Portuguese, "hospedar", "zumbido");
+
+		#[cfg(feature = "spanish")]
+		test_lang(Language::Spanish, "lejano", "zurdo");
+	}
+
+	#[cfg(not(feature = "compact"))]
 	#[test]
 	fn words_by_prefix() {
 		let lang = Language::English;
