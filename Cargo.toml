@@ -56,6 +56,7 @@ unicode-normalization = { version = "=0.1.22", default-features = false, optiona
 # Enabling the "rand" feature by default to run the benches
 bip39 = { path = ".", features = ["rand"] }
 bitcoin_hashes = ">=0.12,<0.14" # enable default features for test
+tokio = { version = "1", features = ["macros", "rt"] }
 
 
 [package.metadata.docs.rs]
